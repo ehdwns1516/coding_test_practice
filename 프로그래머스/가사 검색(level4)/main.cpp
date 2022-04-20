@@ -35,149 +35,204 @@
  "pro?"는 매치되는 가사 단어가 없으므로 0 입니다.
  */
 
+//#include <string>
+//#include <vector>
+//#include <unordered_map>
+//#include <algorithm>
+//#include <iostream>
+//
+//using namespace std;
+//
+//int findCount(vector<string> words, string queries){
+//    if(!words.size())
+//        return 0;
+//    int index = 0;
+//    for( ; index < queries.size(); index++){
+//        if(queries[index] == '?')
+//            break;
+//    }
+//    if(index == 0)
+//        return words.size();
+//
+//    string key_word = queries.substr(0, index);
+//
+//    int low = 0;
+//    for(; low < words.size(); low++){
+//        if(words[low].substr(0, index) == key_word){
+//            break;
+//        }
+//
+//    }
+//    int start = low;
+//    int high = words.size();
+//    while(low + 1 < high){
+//        int mid = (low + high) / 2;
+//        if(words[mid].substr(0, index) != key_word)
+//            high = mid;
+//        else
+//            low = mid;
+//    }
+//    return high - start;
+//}
+//
+//
+//
+//vector<int> solution(vector<string> words, vector<string> queries) {
+//    vector<int> answer;
+//    unordered_map<string, int> queries_count;
+//    if(queries.size() > 1000){ //쿼리 개수가 많을 때는 hash가 유리하다. 하지만 쿼리 개수가 적고 단어의 개수가 많다면 불리하다.
+//        for(int i = 0 ; i < words.size(); i++){
+//        string word = words[i];
+//        queries_count[word]++;
+//        queries_count[string(words[i].size(), '?')]++;
+//            for(int j = 1; j < word.size(); j++){
+//                string front = (string(j, '?')) + word.substr(j);
+//                string back = word.substr(0, j) + (string(word.size() - j, '?'));
+//                queries_count[front]++;
+//                queries_count[back]++;
+//            }
+//        }
+//        for(int i = 0 ; i < queries.size(); i++){
+//            answer.push_back(queries_count[queries[i]]);
+//        }
+//    }
+//    else{
+//        unordered_map<int, vector<string>> div_size_words;
+//        unordered_map<int, vector<string>> div_size_words_reverse;
+//        for(int i = 0; i < words.size(); i++){
+//            string temp = words[i];
+//            int size = temp.size();
+//            div_size_words[size].push_back(temp);
+//            reverse(temp.begin(), temp.end());
+//            div_size_words_reverse[size].push_back(temp);
+//        }
+//
+//        for(auto iter = div_size_words.begin(); iter != div_size_words.end(); iter++){
+//            sort(iter->second.begin(), iter->second.end());
+//        }
+//
+//        for(auto iter = div_size_words_reverse.begin(); iter != div_size_words_reverse.end(); iter++){
+//            sort(iter->second.begin(), iter->second.end());
+//        }
+//
+//        for(int i = 0; i < queries.size(); i++){
+//            if(queries[i][0] == '?'){
+//                reverse(queries[i].begin(), queries[i].end());
+//                int result = findCount(div_size_words_reverse[queries[i].size()], queries[i]);
+//                answer.push_back(result);
+//            }
+//            else{
+//                int result = findCount(div_size_words[queries[i].size()], queries[i]);
+//                answer.push_back(result);
+//            }
+//        }
+//    }
+//
+//    return answer;
+//}
+
+
+// 이분 탐색으로만 풀이
 #include <string>
 #include <vector>
-#include <unordered_map>
 #include <algorithm>
-#include <iostream>
 
 using namespace std;
 
-// bool comp(string a, string b){
-//     if(a.size() == b.size()){
-//         return a <= b;
-//     }
-//     else{
-//         return a.size() < b.size();
-//     }
-    
-// }
-
-// int findCount_(vector<string> words, string query){
-//     if(!words.size())
-//         return 0;
-//     string min = query;
-//     string max = query;
-    
-//     for(int i = 0; i < query.size(); i++){
-//         if(query[i] == '?'){
-//             min[i] = 'a';
-//             max[i] = 'z';
-//         }
-//     }
-//     // for(int i = 0; i < words.size(); i++){
-//     //     cout << words[i] << endl;
-//     // }
-//     // cout << endl;
-//     // cout << min << ':' << max << endl;
-//     int min_low = -1;
-//     int min_high = words.size();
-//     while(min_low + 1 < min_high){
-//         int mid = (min_low + min_high) / 2;
-//         if(comp(words[mid], min))
-//             min_low = mid;
-//         else
-//             min_high = mid;
-//     }
-    
-//     int max_low = -1;
-//     int max_high = words.size();
-//     while(max_low + 1 < max_high){
-//         int mid = (max_low + max_high) / 2;
-//         if(comp(words[mid], max))
-//             max_low = mid;
-//         else
-//             max_high = mid;
-//     }
-//     // cout << min_low << min_high << max_low << max_high << endl;
-
-//     return (max_low + 1) - (min_low + 1);
-// }
-
-int findCount(vector<string> words, string queries){
-    if(!words.size())
-        return 0;
-    int index = 0;
-    for( ; index < queries.size(); index++){
-        if(queries[index] == '?')
-            break;
+bool comp(string a, string b){
+    if(a.size() == b.size()){
+        return a <= b;
     }
-    if(index == 0)
-        return words.size();
-    
-    string key_word = queries.substr(0, index);
-    
-    int low = 0;
-    for(; low < words.size(); low++){
-        if(words[low].substr(0, index) == key_word){
-            break;
-        }
-            
-    }
-    int start = low;
-    int high = words.size();
-    while(low + 1 < high){
-        int mid = (low + high) / 2;
-        if(words[mid].substr(0, index) != key_word)
-            high = mid;
-        else
-            low = mid;
-    }
-    return high - start;
+    return a.size() <= b.size();
 }
-
-
 
 vector<int> solution(vector<string> words, vector<string> queries) {
     vector<int> answer;
-    unordered_map<string, int> queries_count;
-    if(queries.size() > 1000){ //쿼리 개수가 많을 때는 hash가 유리하다. 하지만 쿼리 개수가 적고 단어의 개수가 많다면 불리하다.
-        for(int i = 0 ; i < words.size(); i++){
-        string word = words[i];
-        queries_count[word]++;
-        queries_count[string(words[i].size(), '?')]++;
-            for(int j = 1; j < word.size(); j++){
-                string front = (string(j, '?')) + word.substr(j);
-                string back = word.substr(0, j) + (string(word.size() - j, '?'));
-                queries_count[front]++;
-                queries_count[back]++;
-            }
-        }
-        for(int i = 0 ; i < queries.size(); i++){
-            answer.push_back(queries_count[queries[i]]);
-        }
-    }
-    else{
-        unordered_map<int, vector<string>> div_size_words;
-        unordered_map<int, vector<string>> div_size_words_reverse;
-        for(int i = 0; i < words.size(); i++){
-            string temp = words[i];
-            int size = temp.size();
-            div_size_words[size].push_back(temp);
-            reverse(temp.begin(), temp.end());
-            div_size_words_reverse[size].push_back(temp);
-        }
-
-        for(auto iter = div_size_words.begin(); iter != div_size_words.end(); iter++){
-            sort(iter->second.begin(), iter->second.end());
-        }
-
-        for(auto iter = div_size_words_reverse.begin(); iter != div_size_words_reverse.end(); iter++){
-            sort(iter->second.begin(), iter->second.end());
-        }
-
-        for(int i = 0; i < queries.size(); i++){
-            if(queries[i][0] == '?'){
-                reverse(queries[i].begin(), queries[i].end());
-                int result = findCount(div_size_words_reverse[queries[i].size()], queries[i]);
-                answer.push_back(result);
-            }
-            else{
-                int result = findCount(div_size_words[queries[i].size()], queries[i]);
-                answer.push_back(result);
-            }
-        }
-    }
+    vector<string> reverse_words;
     
+    for(string word : words){
+        reverse(word.begin(), word.end());
+        reverse_words.push_back(word);
+    }
+    sort(reverse_words.begin(), reverse_words.end(), comp);
+    sort(words.begin(), words.end(), comp);
+    
+    for(string query : queries){
+        if(query[0] == '?'){
+            string temp_start = query;
+            reverse(temp_start.begin(), temp_start.end());
+            string temp_end = temp_start;
+            for(int i = temp_start.size() - 1; i > -1; i--){
+                if(temp_start[i] == '?')
+                    temp_start[i] = 'a';
+                else
+                    break;
+            }
+            for(int i = temp_end.size() - 1; i > -1; i--){
+                if(temp_end[i] == '?')
+                    temp_end[i] = 'z';
+                else
+                    break;
+            }
+            
+            int start_low = -1;
+            int start_high = reverse_words.size();
+            while(start_low + 1 < start_high){
+                int mid = (start_low + start_high) / 2;
+                if(!comp(reverse_words[mid], temp_start))
+                    start_high = mid;
+                else
+                    start_low = mid;
+            }
+            
+            int end_low = -1;
+            int end_high = reverse_words.size();
+            while(end_low + 1 < end_high){
+                int mid = (end_low + end_high) / 2;
+                if(!comp(reverse_words[mid], temp_end))
+                    end_high = mid;
+                else
+                    end_low = mid;
+            }
+            answer.push_back(((end_low + 1) - (start_low + 1)));
+        }
+        else{
+            string temp_start = query;
+            string temp_end = temp_start;
+            for(int i = temp_start.size() - 1; i > -1; i--){
+                if(temp_start[i] == '?')
+                    temp_start[i] = 'a';
+                else
+                    break;
+            }
+            for(int i = temp_end.size() - 1; i > -1; i--){
+                if(temp_end[i] == '?')
+                    temp_end[i] = 'z';
+                else
+                    break;
+            }
+            
+            int start_low = -1;
+            int start_high = words.size();
+            while(start_low + 1 < start_high){
+                int mid = (start_low + start_high) / 2;
+                if(!comp(words[mid], temp_start))
+                    start_high = mid;
+                else
+                    start_low = mid;
+            }
+            
+            int end_low = -1;
+            int end_high = words.size();
+            while(end_low + 1 < end_high){
+                int mid = (end_low + end_high) / 2;
+                if(!comp(words[mid], temp_end))
+                    end_high = mid;
+                else
+                    end_low = mid;
+            }
+            answer.push_back(((end_low + 1) - (start_low + 1)));
+        }
+    }
     return answer;
 }
