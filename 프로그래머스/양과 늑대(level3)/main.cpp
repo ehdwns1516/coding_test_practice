@@ -104,3 +104,50 @@ int solution(vector<int> info, vector<vector<int>> edges) {
     
     return max_;
 }
+
+
+// 비트마스킹 풀이
+
+int solution(vector<int> info, vector<vector<int>> edges) {
+    int answer = 0;
+    
+    queue<tuple<int, int, int>> q;
+    unordered_map<int, vector<int>> edge;
+    vector<bool> visited(1 << (info.size()), false);
+    
+    for(int i = 0; i < edges.size(); i++){
+        edge[edges[i][0]].push_back(edges[i][1]);
+    }
+    
+    q.push({1, 0, 1 << 0});
+    while(!q.empty()){
+        auto [sheep, wolf, curr] = q.front();
+        q.pop();
+        if(visited[curr])
+            continue;
+        visited[curr] = true;
+        if(sheep > answer)
+            answer = sheep;
+        
+        for(int i = 0; i < info.size(); i++){
+            if(curr & (1 << i)){
+                for(int j : edge[i]){
+                    int next = curr | (1 << j);
+                    if(visited[next])
+                        continue;
+                    if(info[j]){
+                        if(sheep <= wolf + 1)
+                            continue;
+                        q.push({sheep, wolf + 1, next});
+                    }
+                    else{
+                        q.push({sheep + 1, wolf, next});
+                    }
+                }
+                
+            }
+        }
+    }
+    
+    return answer;
+}
